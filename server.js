@@ -1,40 +1,31 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
+const cors = require('cors');
+
 const app = express();
+app.use(cors());
+app.use(express.json());
 
-// MongoDB Connection (FIXED)
-mongoose.connect('mongodb+srv://saraswathi:saraswathireddy99024@cluster0.xxxxx.mongodb.net/portfolioDB?retryWrites=true&w=majority')
-    .then(() => console.log('✅ Database Connected'))
-    .catch(err => console.log('❌ Connection Error:', err));
+// REPLACE YOUR_PASSWORD with Saraswathireddy99024
+const MONGO_URI = "mongodb+srv://saraswathi:Saraswathireddy99024@cluster0.zncizeu.mongodb.net/portfolio?retryWrites=true&w=majority&appName=Cluster0";
 
-// Schema
-const projectSchema = new mongoose.Schema({
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ Database Connected Successfully"))
+    .catch(err => console.log("❌ DB Error: ", err));
+
+const Project = mongoose.model('Project', {
     title: String,
     description: String,
-    link: String
+    tech: String
 });
-const Project = mongoose.model('Project', projectSchema);
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Serve frontend
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Route
-app.post('/add-project', async (req, res) => {
+app.get('/api/projects', async (req, res) => {
     try {
-        const newProject = new Project(req.body);
-        await newProject.save();
-        res.send('<h1>Success!</h1><p>Project added to Database.</p><a href="/">Go Back</a>');
+        const projects = await Project.find();
+        res.json(projects);
     } catch (err) {
-        console.log(err);
-        res.status(500).send('Error saving project.');
+        res.status(500).json(err);
     }
 });
 
-// Server
-app.listen(3000, () => console.log('🚀 Running at http://localhost:3000'));
-
+app.listen(5000, () => console.log("🚀 Server running on port 5000"));
